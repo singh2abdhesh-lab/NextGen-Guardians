@@ -123,3 +123,4 @@ class GatewayNegativeApiTest {
                 .jsonPath("$.errorCode").isEqualTo("DOWNSTREAM_SERVICE_ERROR");
     }
 }
+

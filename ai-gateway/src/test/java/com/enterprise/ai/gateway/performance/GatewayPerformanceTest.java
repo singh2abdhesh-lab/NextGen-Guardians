@@ -188,3 +188,4 @@ class GatewayPerformanceTest {
         assertEquals(30, rejectedCount.get(), "Exactly 30 requests must be rejected under concurrent access");
     }
 }
+

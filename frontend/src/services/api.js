@@ -15,6 +15,26 @@ const BASE_URLS = {
 export const ApiService = {
   mode: 'auto', // 'auto', 'live', 'mock'
 
+  // Issued JWT for the session (dot-free userIds would also pass, but a real
+  // token exercises the full JWT + RBAC identity path in the gateway).
+  _token: null,
+
+  async ensureToken() {
+    if (this._token) return this._token;
+    try {
+      const res = await fetch('/api/v1/auth/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: 'secops-operator', role: 'ANALYST' })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        this._token = data.token;
+      }
+    } catch (e) { /* live below will fall back to simulation */ }
+    return this._token;
+  },
+
   // Probe service health
   async checkHealth() {
     const services = [
@@ -43,14 +63,19 @@ export const ApiService = {
 
   // Process prompt through AI Gateway
   async sendChat(payload) {
+    const token = await this.ensureToken();
     try {
       const response = await fetch(`${BASE_URLS.gateway}/chat`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {})
+        },
         body: JSON.stringify(payload)
       });
       if (response.ok) {
-        return await response.json();
+        const data = await response.json();
+        return { ...data, _live: true };
       }
     } catch (e) {
       console.warn('Backend unavailable, generating client-side simulation response.');
@@ -68,7 +93,7 @@ export const ApiService = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ requestId, prompt })
       });
-      if (response.ok) return await response.json();
+      if (response.ok) return { ...(await response.json()), _live: true };
     } catch (e) {}
     return this.simulateScan(requestId, prompt);
   },
@@ -81,7 +106,7 @@ export const ApiService = {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ requestId, prompt })
       });
-      if (response.ok) return await response.json();
+      if (response.ok) return { ...(await response.json()), _live: true };
     } catch (e) {}
     return this.simulateRedact(requestId, prompt);
   },

@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * Evaluates the sensitivity of detected data (PII, credentials, proprietary secrets).
- * Weight: 40%
+ * Weight: 50%
  */
 @Component
 public class DataSensitivityFactorScorer implements FactorScorer {

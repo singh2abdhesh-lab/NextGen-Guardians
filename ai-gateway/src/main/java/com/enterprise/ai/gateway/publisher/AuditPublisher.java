@@ -28,7 +28,7 @@ public class AuditPublisher {
     @Autowired
     public AuditPublisher(
             KafkaAuditProducer kafkaAuditProducer,
-            @Qualifier("auditClient") WebClient auditClient) {
+            @Qualifier("auditWebClient") WebClient auditClient) {
         this.kafkaAuditProducer = kafkaAuditProducer;
         this.auditClient = auditClient;
     }
@@ -81,3 +81,4 @@ public class AuditPublisher {
         }
     }
 }
+

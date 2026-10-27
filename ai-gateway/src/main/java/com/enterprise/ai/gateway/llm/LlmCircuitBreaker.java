@@ -3,6 +3,7 @@ package com.enterprise.ai.gateway.llm;
 import com.enterprise.ai.gateway.config.LlmProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -30,6 +31,7 @@ public class LlmCircuitBreaker {
     private final AtomicReference<Instant> lastFailureTime = new AtomicReference<>(Instant.MIN);
     private final AtomicReference<Instant> lastStateChange = new AtomicReference<>(Instant.now());
 
+    @Autowired
     public LlmCircuitBreaker(LlmProperties properties) {
         this.properties = properties != null ? properties : new LlmProperties();
     }
@@ -126,3 +128,4 @@ public class LlmCircuitBreaker {
         return lastStateChange.get();
     }
 }
+

@@ -183,7 +183,7 @@ class AuditServiceTest {
         Map<String, Object> report = auditService.getComplianceReport(30);
 
         assertNotNull(report);
-        assertEquals(2, report.get("totalEvents"));
+        assertEquals(2L, report.get("totalEvents"));
         assertEquals(1L, report.get("allowedCount"));
         assertEquals(1L, report.get("blockedCount"));
         assertEquals(50.0, report.get("complianceRate"));

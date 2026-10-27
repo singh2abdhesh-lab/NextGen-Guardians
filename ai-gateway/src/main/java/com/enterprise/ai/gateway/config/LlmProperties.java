@@ -128,3 +128,4 @@ public class LlmProperties {
         public void setCostPer1kOutput(double costPer1kOutput) { this.costPer1kOutput = costPer1kOutput; }
     }
 }
+

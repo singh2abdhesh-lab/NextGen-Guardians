@@ -67,3 +67,4 @@ public class TokenCalculator {
         return contentTokens + roleTokens + 3;
     }
 }
+

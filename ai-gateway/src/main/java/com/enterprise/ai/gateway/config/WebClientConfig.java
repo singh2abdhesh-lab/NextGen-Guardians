@@ -17,33 +17,34 @@ public class WebClientConfig {
         return WebClient.builder().exchangeStrategies(strategies);
     }
 
-    @Bean("scannerClient")
-    public WebClient scannerClient(WebClient.Builder builder,
-                                    @Value("${ai.services.scanner-url}") String url) {
+    @Bean("scannerWebClient")
+    public WebClient scannerWebClient(WebClient.Builder builder,
+                                       @Value("${ai.services.scanner-url}") String url) {
         return builder.baseUrl(url).build();
     }
 
-    @Bean("riskClient")
-    public WebClient riskClient(WebClient.Builder builder,
-                                 @Value("${ai.services.risk-url}") String url) {
+    @Bean("riskWebClient")
+    public WebClient riskWebClient(WebClient.Builder builder,
+                                    @Value("${ai.services.risk-url}") String url) {
         return builder.baseUrl(url).build();
     }
 
-    @Bean("auditClient")
-    public WebClient auditClient(WebClient.Builder builder,
-                                  @Value("${ai.services.audit-url}") String url) {
+    @Bean("auditWebClient")
+    public WebClient auditWebClient(WebClient.Builder builder,
+                                     @Value("${ai.services.audit-url}") String url) {
         return builder.baseUrl(url).build();
     }
 
-    @Bean("qualityClient")
-    public WebClient qualityClient(WebClient.Builder builder,
-                                    @Value("${ai.services.quality-url}") String url) {
+    @Bean("qualityWebClient")
+    public WebClient qualityWebClient(WebClient.Builder builder,
+                                       @Value("${ai.services.quality-url}") String url) {
         return builder.baseUrl(url).build();
     }
 
-    @Bean("llmClient")
-    public WebClient llmClient(WebClient.Builder builder,
-                                @Value("${ai.upstream.base-url}") String url) {
+    @Bean("llmWebClient")
+    public WebClient llmWebClient(WebClient.Builder builder,
+                                   @Value("${ai.upstream.base-url}") String url) {
         return builder.baseUrl(url).build();
     }
 }
+

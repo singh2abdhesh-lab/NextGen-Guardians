@@ -38,7 +38,7 @@ public class LlmClient {
     private final LlmCircuitBreaker circuitBreaker;
 
     public LlmClient(
-            @Qualifier("llmClient") WebClient webClient,
+            @Qualifier("llmWebClient") WebClient webClient,
             LlmProperties properties,
             TokenCalculator tokenCalculator,
             CostCalculator costCalculator,
@@ -261,3 +261,4 @@ public class LlmClient {
         }
     }
 }
+

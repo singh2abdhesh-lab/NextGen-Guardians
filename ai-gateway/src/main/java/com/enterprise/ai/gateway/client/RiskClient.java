@@ -22,7 +22,7 @@ public class RiskClient {
 
     private final WebClient webClient;
 
-    public RiskClient(@Qualifier("riskClient") WebClient webClient) {
+    public RiskClient(@Qualifier("riskWebClient") WebClient webClient) {
         this.webClient = webClient;
     }
 
@@ -42,3 +42,4 @@ public class RiskClient {
                 .doOnError(e -> log.error("Risk client error for requestId={}: {}", request.getRequestId(), e.getMessage()));
     }
 }
+

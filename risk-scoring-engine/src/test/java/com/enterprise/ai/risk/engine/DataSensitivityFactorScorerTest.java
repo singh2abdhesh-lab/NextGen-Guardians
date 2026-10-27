@@ -20,15 +20,15 @@ class DataSensitivityFactorScorerTest {
     }
 
     @Test
-    @DisplayName("Should apply 40% weight to raw sensitivity score")
+    @DisplayName("Should apply 50% weight to raw sensitivity score")
     void testWeightedContribution() {
         RiskAssessRequest request = RiskAssessRequest.builder()
                 .dataSensitivity(50)
                 .build();
 
-        assertEquals(0.40, scorer.getWeight());
+        assertEquals(0.50, scorer.getWeight());
         assertEquals(50, scorer.calculateRawScore(request));
-        assertEquals(20, scorer.calculateWeightedPoints(request)); // 50 * 0.40 = 20
+        assertEquals(25, scorer.calculateWeightedPoints(request)); // 50 * 0.50 = 25
     }
 
     @Test
@@ -40,6 +40,6 @@ class DataSensitivityFactorScorerTest {
                 .build();
 
         assertEquals(75, scorer.calculateRawScore(request));
-        assertEquals(30, scorer.calculateWeightedPoints(request)); // 75 * 0.40 = 30
+        assertEquals(38, scorer.calculateWeightedPoints(request)); // 75 * 0.50 = 37.5 → 38
     }
 }

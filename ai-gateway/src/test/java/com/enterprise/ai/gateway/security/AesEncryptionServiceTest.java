@@ -43,3 +43,4 @@ class AesEncryptionServiceTest {
         assertNull(AesEncryptionService.decrypt(null, SECRET_KEY));
     }
 }
+

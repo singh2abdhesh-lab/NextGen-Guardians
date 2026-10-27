@@ -133,3 +133,4 @@ public class GatewayGlobalExceptionHandler {
         return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse));
     }
 }
+

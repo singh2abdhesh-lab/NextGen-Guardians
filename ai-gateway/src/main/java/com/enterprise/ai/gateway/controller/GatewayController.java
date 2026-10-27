@@ -163,3 +163,4 @@ public class GatewayController {
         return Mono.just(ResponseEntity.ok(Map.of("status", "UP")));
     }
 }
+

@@ -68,7 +68,7 @@ export default function PlaygroundView({ onEventGenerated }) {
     try {
       const payload = {
         requestId: `req-${Date.now()}`,
-        userId: 'secops.operator@enterprise.ai',
+        userId: 'secops-operator',
         userRole,
         prompt,
         promptCategory,
@@ -97,6 +97,7 @@ export default function PlaygroundView({ onEventGenerated }) {
 
       setResult({
         requestId: reqId,
+        _live: redactRes._live !== false && scanRes._live !== false,
         action: scanRes.blocked ? 'BLOCK' : 'ALLOW',
         blocked: scanRes.blocked,
         blockedReason: scanRes.blocked ? 'Violations exceeded sensitivity threshold' : null,
@@ -337,7 +338,21 @@ export default function PlaygroundView({ onEventGenerated }) {
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', height: '100%' }}>
-              {/* Verdict Header Banner */}
+              {/* Simulation fallback banner */}
+      {result && result._live === false && (
+        <div style={{
+          padding: '8px 14px',
+          borderRadius: '8px',
+          background: 'rgba(245, 158, 11, 0.12)',
+          border: '1px solid #f59e0b',
+          fontSize: '0.75rem',
+          color: '#f59e0b'
+        }}>
+          ⚠ Simulated result — backend unreachable. Showing client-side pipeline emulation, not live gateway data.
+        </div>
+      )}
+
+      {/* Verdict Header Banner */}
               <div style={{
                 padding: '14px 18px',
                 borderRadius: '12px',

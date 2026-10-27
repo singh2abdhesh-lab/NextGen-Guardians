@@ -42,3 +42,4 @@ class TokenCalculatorTest {
         assertEquals(contentTokens + tokenCalculator.calculateTokens("user") + 3, totalTokens);
     }
 }
+

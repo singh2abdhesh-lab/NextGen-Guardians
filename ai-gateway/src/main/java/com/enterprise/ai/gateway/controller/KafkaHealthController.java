@@ -45,3 +45,4 @@ public class KafkaHealthController {
         return Mono.just(ResponseEntity.ok(health));
     }
 }
+

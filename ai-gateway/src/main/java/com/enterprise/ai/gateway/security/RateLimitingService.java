@@ -37,18 +37,25 @@ public class RateLimitingService {
         long maxQuota = getRoleQuotaPerMinute(role);
         long now = Instant.now().getEpochSecond();
 
+        // The allow decision is made inside compute() so decrement, window reset, and rejection
+        // stay atomic per key under concurrent access.
+        boolean[] allowedHolder = new boolean[1];
         TokenBucket bucket = buckets.compute(clientIdentifier, (key, existing) -> {
             if (existing == null || now - existing.windowStartEpoch >= WINDOW_SECONDS) {
+                allowedHolder[0] = true;
                 return new TokenBucket(now, maxQuota - 1);
             }
             if (existing.remainingTokens > 0) {
                 existing.remainingTokens--;
+                allowedHolder[0] = true;
+                return existing;
             }
+            allowedHolder[0] = false;
             return existing;
         });
 
         long resetSeconds = Math.max(1, (bucket.windowStartEpoch + WINDOW_SECONDS) - now);
-        boolean allowed = bucket.remainingTokens >= 0;
+        boolean allowed = allowedHolder[0];
 
         if (!allowed) {
             log.warn("Rate limit exceeded for client='{}' role='{}' (limit={} req/min)", clientIdentifier, role, maxQuota);
@@ -107,3 +114,4 @@ public class RateLimitingService {
         }
     }
 }
+

@@ -22,7 +22,7 @@ public class PromptInjectionDetector implements Detector {
     private record InjectionRule(Pattern pattern, Severity severity, String type, String description) {}
 
     private final List<InjectionRule> rules = List.of(
-            new InjectionRule(Pattern.compile("ignore\\s+(?:all|any|previous|prior)\\s+instructions?", Pattern.CASE_INSENSITIVE),
+            new InjectionRule(Pattern.compile("ignore\\s+(?:(?:all|any)\\s+)?(?:previous|prior)?\\s*instructions?", Pattern.CASE_INSENSITIVE),
                     Severity.CRITICAL, "PROMPT_INJECTION_OVERRIDE", "Instruction override attempt detected"),
             new InjectionRule(Pattern.compile("disregard\\s+(?:all|all\\s+prior|all\\s+previous)\\s+instructions?", Pattern.CASE_INSENSITIVE),
                     Severity.CRITICAL, "PROMPT_INJECTION_OVERRIDE", "Instruction disregard attempt detected"),

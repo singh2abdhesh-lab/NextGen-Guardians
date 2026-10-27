@@ -51,3 +51,4 @@ class RateLimitingServiceTest {
         assertTrue(blocked.getResetSeconds() > 0);
     }
 }
+

@@ -11,6 +11,10 @@ export default defineConfig({
         target: 'http://localhost:8080',
         changeOrigin: true
       },
+      '/api/v1/auth': {
+        target: 'http://localhost:8080',
+        changeOrigin: true
+      },
       '/api/v1/gateway': {
         target: 'http://localhost:8080',
         changeOrigin: true

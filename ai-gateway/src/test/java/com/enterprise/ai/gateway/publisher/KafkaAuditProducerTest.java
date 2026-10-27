@@ -75,3 +75,4 @@ class KafkaAuditProducerTest {
         assertTrue(future.isCompletedExceptionally());
     }
 }
+

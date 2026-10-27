@@ -45,8 +45,9 @@ public class IdentityValidator {
 
         String rawToken = extractBearerToken(request.getUserId());
 
-        // 1. Check if token is a signed JWT
-        if (rawToken != null && rawToken.contains(".")) {
+        // 1. Check if token is a signed JWT — only when the userId carries an explicit Bearer prefix,
+        //    so plain credential-style identifiers (including email addresses) take the fallback path.
+        if (rawToken != null && request.getUserId() != null && request.getUserId().startsWith("Bearer ")) {
             if (!jwtTokenService.validateToken(rawToken)) {
                 log.warn("Identity validation rejected: invalid or expired JWT token");
                 return IdentityValidationResult.rejected("UNAUTHORIZED: Invalid, expired, or tampered JWT token");
@@ -154,3 +155,4 @@ public class IdentityValidator {
         }
     }
 }
+

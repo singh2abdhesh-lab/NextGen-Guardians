@@ -160,3 +160,4 @@ class GatewayControllerTest {
                 .jsonPath("$.userRole").isEqualTo("ENGINEER");
     }
 }
+

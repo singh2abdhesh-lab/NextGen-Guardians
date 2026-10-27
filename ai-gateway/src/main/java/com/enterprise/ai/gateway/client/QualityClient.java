@@ -22,7 +22,7 @@ public class QualityClient {
 
     private final WebClient webClient;
 
-    public QualityClient(@Qualifier("qualityClient") WebClient webClient) {
+    public QualityClient(@Qualifier("qualityWebClient") WebClient webClient) {
         this.webClient = webClient;
     }
 
@@ -55,3 +55,4 @@ public class QualityClient {
         return check(request.getRequestId(), request.getPrompt(), request.getResponse());
     }
 }
+

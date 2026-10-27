@@ -43,3 +43,4 @@ class CostCalculatorTest {
         assertEquals(0.0, cost);
     }
 }
+

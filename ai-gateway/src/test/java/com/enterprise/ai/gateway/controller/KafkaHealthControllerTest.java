@@ -42,3 +42,4 @@ class KafkaHealthControllerTest {
                 .jsonPath("$.successfulDispatches").isEqualTo(42);
     }
 }
+

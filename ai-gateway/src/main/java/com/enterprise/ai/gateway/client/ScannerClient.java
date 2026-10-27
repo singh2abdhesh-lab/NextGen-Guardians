@@ -23,7 +23,7 @@ public class ScannerClient {
 
     private final WebClient webClient;
 
-    public ScannerClient(@Qualifier("scannerClient") WebClient webClient) {
+    public ScannerClient(@Qualifier("scannerWebClient") WebClient webClient) {
         this.webClient = webClient;
     }
 
@@ -71,3 +71,4 @@ public class ScannerClient {
                 .doOnError(e -> log.error("Redaction client error for requestId={}: {}", requestId, e.getMessage()));
     }
 }
+

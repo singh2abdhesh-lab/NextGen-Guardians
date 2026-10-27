@@ -79,3 +79,4 @@ class LlmCircuitBreakerTest {
         assertEquals(State.HALF_OPEN, circuitBreaker.getState());
     }
 }
+

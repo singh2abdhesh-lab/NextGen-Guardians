@@ -12,10 +12,13 @@ public final class SecurityConstants {
     }
 
     // --- Multi-Factor Risk Matrix Weights (Sum = 1.0) ---
-    public static final double WEIGHT_DATA_SENSITIVITY = 0.40;
+    // Data sensitivity dominates so that a high-sensitivity request (>= 90) from a
+    // low-clearance role reaches CRITICAL (>= 80) on its own; a weighted average with
+    // data at 0.40 caps the composite at ~77 in that scenario, making CRITICAL unreachable.
+    public static final double WEIGHT_DATA_SENSITIVITY = 0.50;
     public static final double WEIGHT_USER_ROLE = 0.25;
     public static final double WEIGHT_PROMPT_CATEGORY = 0.20;
-    public static final double WEIGHT_TARGET_MODEL = 0.15;
+    public static final double WEIGHT_TARGET_MODEL = 0.05;
 
     // --- Score Thresholds ---
     public static final int SCORE_MAX = 100;

@@ -57,3 +57,4 @@ class JwtTokenServiceTest {
         assertThrows(IllegalArgumentException.class, () -> jwtTokenService.parseClaims(""));
     }
 }
+

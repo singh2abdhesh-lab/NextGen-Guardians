@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * Evaluates the target LLM model infrastructure risk.
- * Weight: 15%
+ * Weight: 5%
  */
 @Component
 public class TargetModelFactorScorer implements FactorScorer {

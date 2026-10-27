@@ -62,3 +62,4 @@ class RbacSecurityManagerTest {
         assertFalse(rbacSecurityManager.canApproveReviewQueue(UserRole.INTERN));
     }
 }
+

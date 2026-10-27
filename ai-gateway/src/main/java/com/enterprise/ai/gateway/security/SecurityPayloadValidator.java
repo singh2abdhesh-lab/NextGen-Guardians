@@ -41,3 +41,4 @@ public class SecurityPayloadValidator {
         return SanitizationUtils.stripInvisibleChars(rawPrompt);
     }
 }
+

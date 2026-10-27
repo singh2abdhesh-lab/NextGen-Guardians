@@ -62,3 +62,4 @@ public class CostCalculator {
         return BigDecimal.valueOf(total).setScale(6, RoundingMode.HALF_UP).doubleValue();
     }
 }
+
