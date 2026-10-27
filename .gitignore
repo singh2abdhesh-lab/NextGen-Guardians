@@ -1,0 +1,109 @@
+# -----------------------------------------------------------------------------
+# Enterprise AI Guardian - Unified .gitignore
+# Covers Java 17, Spring Boot 3.3, Maven Multi-Module, and React / Vite Frontend
+# -----------------------------------------------------------------------------
+
+# Compiled Java class files
+*.class
+
+# Log and process files
+*.log
+logs/
+*.out
+*.pid
+
+# BlueJ files
+*.ctxt
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Maven build outputs
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Gradle (if applicable)
+.gradle/
+build/
+
+# JetBrains IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+!**/src/main/**/.idea
+
+# Eclipse IDE
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbproject/genfiles.properties
+/nbproject/project.xml
+
+# Node & React Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.cache/
+node_modules/
+dist/
+.eslintcache
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment & Secret files
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# Operating System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+[Dd]esktop.ini
+
+# Temporary and swap files
+*.swp
+*.swo
+*~
+*.bak
+*.tmp
