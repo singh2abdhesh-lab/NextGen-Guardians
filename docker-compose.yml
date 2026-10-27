@@ -1,0 +1,284 @@
+version: '3.8'
+
+networks:
+  ai-guardian-network:
+    driver: bridge
+    name: ai-guardian-network
+
+volumes:
+  postgres_data:
+    driver: local
+  zookeeper_data:
+    driver: local
+  zookeeper_log:
+    driver: local
+  kafka_data:
+    driver: local
+
+services:
+  # -------------------------------------------------------------
+  # 1. PostgreSQL Relational Audit Store
+  # -------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: ai-guardian-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-ai_guardian_audit}
+      POSTGRES_USER: ${POSTGRES_USER:-guardian}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-guardian_secret_pass}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-guardian} -d ${POSTGRES_DB:-ai_guardian_audit}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ai-guardian-network
+
+  # -------------------------------------------------------------
+  # 2. Apache Zookeeper (Distributed Coordinator)
+  # -------------------------------------------------------------
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.0
+    container_name: ai-guardian-zookeeper
+    restart: unless-stopped
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    volumes:
+      - zookeeper_data:/var/lib/zookeeper/data
+      - zookeeper_log:/var/lib/zookeeper/log
+    networks:
+      - ai-guardian-network
+
+  # -------------------------------------------------------------
+  # 3. Apache Kafka (Immutable Audit Stream & DLQ)
+  # -------------------------------------------------------------
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: ai-guardian-kafka
+    restart: unless-stopped
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "9092"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ai-guardian-network
+
+  # -------------------------------------------------------------
+  # 4. Prompt Security Scanner (Port 8081)
+  # -------------------------------------------------------------
+  prompt-security-scanner:
+    build:
+      context: .
+      dockerfile: prompt-security-scanner/Dockerfile
+    container_name: ai-guardian-scanner
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      SERVER_PORT: 8081
+      SPRING_PROFILES_ACTIVE: prod
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8081/api/v1/scan/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - ai-guardian-network
+
+  # -------------------------------------------------------------
+  # 5. Risk Scoring Engine (Port 8082)
+  # -------------------------------------------------------------
+  risk-scoring-engine:
+    build:
+      context: .
+      dockerfile: risk-scoring-engine/Dockerfile
+    container_name: ai-guardian-risk
+    restart: unless-stopped
+    ports:
+      - "8082:8082"
+    environment:
+      SERVER_PORT: 8082
+      SPRING_PROFILES_ACTIVE: prod
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8082/api/v1/risk/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - ai-guardian-network
+
+  # -------------------------------------------------------------
+  # 6. Response Quality Checker (Port 8084)
+  # -------------------------------------------------------------
+  response-quality-checker:
+    build:
+      context: .
+      dockerfile: response-quality-checker/Dockerfile
+    container_name: ai-guardian-quality
+    restart: unless-stopped
+    ports:
+      - "8084:8084"
+    environment:
+      SERVER_PORT: 8084
+      SPRING_PROFILES_ACTIVE: prod
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8084/api/v1/quality/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - ai-guardian-network
+
+  # -------------------------------------------------------------
+  # 7. Audit Service (Port 8083)
+  # -------------------------------------------------------------
+  audit-service:
+    build:
+      context: .
+      dockerfile: audit-service/Dockerfile
+    container_name: ai-guardian-audit
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    ports:
+      - "8083:8083"
+    environment:
+      SERVER_PORT: 8083
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-ai_guardian_audit}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-guardian}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-guardian_secret_pass}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      KAFKA_ENABLED: ${KAFKA_ENABLED:-true}
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8083/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 35s
+    networks:
+      - ai-guardian-network
+
+  # -------------------------------------------------------------
+  # 8. AI Gateway (Port 8080)
+  # -------------------------------------------------------------
+  ai-gateway:
+    build:
+      context: .
+      dockerfile: ai-gateway/Dockerfile
+    container_name: ai-guardian-gateway
+    restart: unless-stopped
+    depends_on:
+      prompt-security-scanner:
+        condition: service_healthy
+      risk-scoring-engine:
+        condition: service_healthy
+      response-quality-checker:
+        condition: service_healthy
+      audit-service:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      SERVER_PORT: 8080
+      SPRING_PROFILES_ACTIVE: prod
+      AI_GATEWAY_CLIENTS_SCANNER_URL: http://prompt-security-scanner:8081
+      AI_GATEWAY_CLIENTS_RISK_URL: http://risk-scoring-engine:8082
+      AI_GATEWAY_CLIENTS_QUALITY_URL: http://response-quality-checker:8084
+      AI_GATEWAY_CLIENTS_AUDIT_URL: http://audit-service:8083
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      KAFKA_ENABLED: ${KAFKA_ENABLED:-true}
+      AI_UPSTREAM_MOCK: ${AI_UPSTREAM_MOCK:-true}
+      AI_UPSTREAM_OPENAI_KEY: ${AI_UPSTREAM_OPENAI_KEY:-}
+      AI_SECURITY_JWT_SECRET: ${AI_SECURITY_JWT_SECRET:-ai-guardian-enterprise-security-jwt-secret-key-super-secure-32bytes}
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 35s
+    networks:
+      - ai-guardian-network
+
+  # -------------------------------------------------------------
+  # 9. AI Governance Service (Port 8085)
+  # -------------------------------------------------------------
+  governance-service:
+    build:
+      context: .
+      dockerfile: governance-service/Dockerfile
+    container_name: ai-guardian-governance
+    restart: unless-stopped
+    ports:
+      - "8085:8085"
+    environment:
+      SERVER_PORT: 8085
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-ai_guardian_audit}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-guardian_admin}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-guardian_secret_pass}
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8085/api/v1/governance/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - ai-guardian-network
+
+  # -------------------------------------------------------------
+  # 10. React Frontend Single Page Application (Port 3000)
+  # -------------------------------------------------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ai-guardian-frontend
+    restart: unless-stopped
+    depends_on:
+      - ai-gateway
+      - audit-service
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    networks:
+      - ai-guardian-network
